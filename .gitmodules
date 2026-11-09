@@ -1,0 +1,6 @@
+[submodule "upstream/agent-workshop"]
+	path = upstream/agent-workshop
+	url = https://github.com/hubooooooo/agent-workshop.git
+[submodule "upstream/idea-to-launch-kit"]
+	path = upstream/idea-to-launch-kit
+	url = https://github.com/hubooooooo/idea-to-launch-kit.git
