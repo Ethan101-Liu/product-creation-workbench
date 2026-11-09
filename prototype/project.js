@@ -7,11 +7,9 @@ const stages=[
  ["发布验证","安装与运行记录","按产品选定的交付形式验收。桌面产品需验证安装、独立启动、退出和重开。"],
  ["交付与迭代","交付清单与遗留问题","核对产物位置、使用说明和已知问题，决定下一轮需求。"]
 ];
-const samplePrd="使用者：独立产品制作者。\n目标：在同一项目内把点子变成可验收的产品。\n验收：重新打开工作台后能继续上次的阶段。";
 const $=id=>document.getElementById(id);
 const el=(tag,value)=>{const node=document.createElement(tag);node.textContent=value;return node};
 function project(name){return {name,step:0,round:1,docs:stages.map(()=>""),feedback:"",history:[]}}
-const sample=project("个人产品工作台 · 示例");Object.assign(sample,{step:1});sample.docs[0]=samplePrd;sample.history.push("示例需求已确认");
 const hostedWeb = Boolean(window.hostedWorkbench);
 const workbenchRequest = window.hostedWorkbench || window.fetch.bind(window);
 const key = hostedWeb ? "product-creation-workbench:web:v1" : "product-workbench-preview-v1";
@@ -19,7 +17,7 @@ const desktopStore=window.desktopWorkspace;
 let lastSaved;
 try { lastSaved=desktopStore ? desktopStore.load() : localStorage.getItem(key); }
 catch (error) { $("notice").textContent="工作区读取失败，请重新打开。 "+error.message; throw error; }
-let state=JSON.parse(lastSaved||"null")||{projects:[sample],active:0};
+let state=JSON.parse(lastSaved||"null")||{projects:[],active:-1,screen:"chat"};
 const current=()=>state.projects[state.active];
 let viewed=Math.min(current()?.step??0,5);
 function save(){try{if(!desktopStore && localStorage.getItem(key)!==lastSaved){$("notice").textContent="另一窗口已修改项目数据。请刷新后继续。";return false}const raw=JSON.stringify(state);if(desktopStore)desktopStore.save(raw);else localStorage.setItem(key,raw);lastSaved=raw;$("notice").textContent="";return true}catch(error){$("notice").textContent="保存失败，请先复制当前内容。 "+error.message;return false}}

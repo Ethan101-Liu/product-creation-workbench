@@ -9,7 +9,7 @@ import tempfile
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 NAME = "产品创建工作台"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 parser = argparse.ArgumentParser()
 parser.add_argument("runtime", type=Path, help="relocatable arm64 CPython 3.12 root")
 parser.add_argument("--output", type=Path, default=ROOT / "工作台发布")
@@ -54,7 +54,7 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
 
     info = dict(CFBundleIdentifier="local.workbench.ProductWorkbench", CFBundleName=NAME,
                 CFBundleDisplayName=NAME, NSPrincipalClass="NSApplication", CFBundlePackageType="APPL",
-                CFBundleExecutable="ProductWorkbench", CFBundleVersion="2", CFBundleShortVersionString=VERSION,
+                CFBundleExecutable="ProductWorkbench", CFBundleVersion="3", CFBundleShortVersionString=VERSION,
                 CFBundleIconFile="Workbench.icns", CFBundleDevelopmentRegion="zh_CN",
                 LSMinimumSystemVersion="14.0", NSHighResolutionCapable=True)
     (contents / "Info.plist").write_bytes(plistlib.dumps(info))

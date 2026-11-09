@@ -1,8 +1,8 @@
 # 产品创建工作台
 
-产品创建工作台是一个可以在自己电脑上运行的开源框架，提供 macOS 桌面 App 和本地浏览器界面。打开即可创建项目，无需注册工作台账号。你可以从一句想法开始，让助手追问需求，得到可编辑的产品需求文档（PRD）和技术方案，再按任务查看产物、运行结果和测试证据。每一步由你确认，项目进度保存在本机。
+产品创建工作台是一个可以在自己电脑上运行的开源框架，提供 macOS 桌面 App 和本地浏览器界面。首次打开是空白工作区，用户可以直接开始会话或新建项目，无需注册工作台账号。你可以从一句想法开始，让助手追问需求，得到可编辑的产品需求文档（PRD）和技术方案，再按任务查看产物、运行结果和测试证据。每一步由你确认，项目进度保存在本机。
 
-[下载 macOS 版（Apple Silicon）](https://github.com/Ethan101-Liu/product-creation-workbench/releases/tag/v0.1.1) · [从源码在本机启动](#从源码启动) · [免安装网页体验](https://ethan101-liu.github.io/product-creation-workbench/) · [使用流程](#使用流程)
+[下载 macOS 版（Apple Silicon）](https://github.com/Ethan101-Liu/product-creation-workbench/releases/latest) · [从源码在本机启动](#从源码启动) · [免安装网页体验](https://ethan101-liu.github.io/product-creation-workbench/) · [使用流程](#使用流程)
 
 ![会话首页，可输入产品想法、选择助手或切换模型](docs/images/home.png)
 
@@ -48,8 +48,8 @@ flowchart TD
 
 ## 在 Mac 上开始
 
-1. 从上方下载入口取得 v0.1.1 的 DMG，打开后将「产品创建工作台」拖入「应用程序」。此版本面向 macOS 14 及以上的 Apple Silicon Mac，使用本机临时签名，尚未完成 Apple 公证。系统可能会限制从互联网下载的应用首次启动。
-2. 打开工作台，选择模型。使用 Codex 时，需要这台 Mac 上有可用的 Codex CLI。v0.1.1 安装包顶部的「登录」用于 Codex 授权，可复用本机已有的 ChatGPT 登录。源码版的同一入口标为「Codex 登录」。使用其他服务时，点「自定义 API Key」，选择厂商和模型并输入 Key，也可以填写自己的 Chat Completions 兼容地址。
+1. 从上方下载入口取得最新的 DMG，打开后将「产品创建工作台」拖入「应用程序」。此版本面向 macOS 14 及以上的 Apple Silicon Mac，使用本机临时签名，尚未完成 Apple 公证。系统可能会限制从互联网下载的应用首次启动。
+2. 打开工作台，选择模型。使用 Codex 时，需要这台 Mac 上有可用的 Codex CLI。点顶部「Codex 登录」可复用本机已有的 ChatGPT 登录，或打开浏览器完成授权。使用其他服务时，点「自定义 API Key」，选择厂商和模型并输入 Key，也可以填写自己的 Chat Completions 兼容地址。
 3. 点左侧「会话」，选择「产品经理助手」并输入想法。生成 PRD 后先核对并确认，再打开项目继续。已接入的模型也可以在对话输入框里切换。
 
 模型请求会把本次对话所需的提问和项目上下文发送到所选服务。API Key 仅保存在当前服务进程的内存中，重启后需重新输入。桌面版的项目、会话及开发产物位于 `~/Library/Application Support/ProductWorkbench/`。从源码启动时，项目与会话保存在当前浏览器，执行任务生成的文件位于源码目录下的 `开发产物/`。桌面 App、本机浏览器版和在线体验版各自保存工作区。
