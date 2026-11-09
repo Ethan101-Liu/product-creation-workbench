@@ -2,7 +2,7 @@
 
 产品创建工作台是一款面向独立开发者和产品制作者的 macOS 应用。你可以从一句想法开始，让助手追问需求，得到可编辑的产品需求文档（PRD）和技术方案，再按任务查看产物、运行结果和测试证据。每一步由你确认，项目进度保存在本机。
 
-[下载 macOS 版（Apple Silicon）](https://github.com/Ethan101-Liu/product-creation-workbench/releases/tag/v0.1.1) · [从源码启动](#从源码启动) · [使用流程](#使用流程)
+[🌐 打开网页版](https://ethan101-liu.github.io/product-creation-workbench/) · [下载 macOS 版（Apple Silicon）](https://github.com/Ethan101-Liu/product-creation-workbench/releases/tag/v0.1.1) · [从源码启动](#从源码启动) · [使用流程](#使用流程)
 
 ![会话首页，可输入产品想法、选择助手或切换模型](docs/images/home.png)
 
@@ -27,6 +27,14 @@ flowchart TD
 **会话**用于开始需求访谈。**项目**集中展示阶段、文档草稿和右侧方案助手，可以边看文档边提问。**文档**按项目列出已确认的版本，确认任一阶段后就能下载单份 Markdown，也可以下载合并文档。
 
 ![项目工作区，中央编辑技术方案，右侧与方案助手讨论，顶部显示六个阶段](docs/images/project.png)
+
+## 直接使用网页版
+
+打开 [在线工作台](https://ethan101-liu.github.io/product-creation-workbench/)，输入产品想法即可开始。默认的「引导模式」会逐项提问，把你的回答整理成 PRD，并提供可编辑的方案和任务模板。用左侧「文档」可以下载已确认的版本。
+
+要与真实模型对话，点「自定义 API Key」，选择服务商或填写兼容接口。浏览器会把 Key 和本次请求所需的内容直接发送到所选 HTTPS 服务商，接口需允许浏览器跨域请求（CORS）。Key 只在当前标签页的内存中保存，刷新后需重新接入。项目和会话保存在当前浏览器，清除网站数据会删除这些记录。
+
+网页版支持记录开发结果与验收证据。本机 Codex 登录、自动执行代码与运行测试可在 macOS 桌面版中使用。
 
 ## 在 Mac 上开始
 

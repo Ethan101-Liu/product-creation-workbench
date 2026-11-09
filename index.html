@@ -1,0 +1,5 @@
+---
+layout: null
+---
+{%- capture workbench -%}{% include_relative prototype/index.html %}{%- endcapture -%}
+{{ workbench | replace: '<head>', '<head><base href="./prototype/"><meta name="referrer" content="no-referrer"><script src="../web/hosted.js"></script>' }}

@@ -6,7 +6,7 @@ async function generateTasks(p){
  const round=p.round;
  taskRequests.add(p);delete p.taskError;render();
  try{
-   const response=await fetch("/api/tasks",{method:"POST",headers:{"Content-Type":"application/json"},
+   const response=await workbenchRequest("/api/tasks",{method:"POST",headers:{"Content-Type":"application/json"},
      body:JSON.stringify({prd:p.docs[0],plan:p.docs[1]})});
    const data=await response.json();
    if(!response.ok)throw Error(data.error||"生成失败");
@@ -38,7 +38,8 @@ function renderTaskList(p,panel){
    t.depends.every(id=>tasks.slice(0,i).some(prev=>prev.id===id))) && list.decisions.every(d=>d.answer.trim());
  function changed(){save();confirm.disabled=!valid()}
  if(list.confirmed){
-   if(p.step===2)renderExecution(p,list,panel);
+   if(p.step===2 && hostedWeb) panel.append(el("p","网页版可在下方记录实际运行结果和验收证据。需要自动执行代码时，请使用桌面版。"));
+   else if(p.step===2)renderExecution(p,list,panel);
    panel.append(reference("查看已确认的完整任务清单",tasks.map((t,i)=>taskText(t,i,tasks)).join("\n\n")));
    if(list.decisions.length)panel.append(reference("已记录的决定",list.decisions.map(d=>d.question+"："+d.answer).join("\n")));
    return;
@@ -106,7 +107,7 @@ async function requestExecution(p,list,op,feedback=""){
  try{
    const body={action:op,id:list.runId,index:old.index,attempt:old.attempt||0,feedback};
    if(op==="start"&&!old.index)body.inputs={confirmed:true,prd:p.docs[0],plan:p.docs[1],tasks:list.tasks,decisions:list.decisions};
-   const res=await fetch("/api/execute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+   const res=await workbenchRequest("/api/execute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
    const value=await res.json();if(!res.ok)throw Error(value.error||"执行服务未响应");
    if(!state.projects.includes(p)||p.taskList!==list)return;
    list.execution=value;
@@ -150,7 +151,7 @@ function renderExecution(p,list,panel){
        if(!file.open||contents.dataset.loaded)return;
        contents.textContent="正在读取…";
        try{
-         const reply=await fetch("/api/execute",{method:"POST",headers:{"Content-Type":"application/json"},
+         const reply=await workbenchRequest("/api/execute",{method:"POST",headers:{"Content-Type":"application/json"},
            body:JSON.stringify({id:list.runId,action:"artifact",attempt:run.attempt,name})});
          const data=await reply.json();if(!reply.ok||typeof data.content!=="string")throw Error(data.error||"文件读取失败");
          contents.textContent=data.content;contents.dataset.loaded="yes";

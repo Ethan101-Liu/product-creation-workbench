@@ -12,7 +12,9 @@ const $=id=>document.getElementById(id);
 const el=(tag,value)=>{const node=document.createElement(tag);node.textContent=value;return node};
 function project(name){return {name,step:0,round:1,docs:stages.map(()=>""),feedback:"",history:[]}}
 const sample=project("个人产品工作台 · 示例");Object.assign(sample,{step:1});sample.docs[0]=samplePrd;sample.history.push("示例需求已确认");
-const key="product-workbench-preview-v1";
+const hostedWeb = Boolean(window.hostedWorkbench);
+const workbenchRequest = window.hostedWorkbench || window.fetch.bind(window);
+const key = hostedWeb ? "product-creation-workbench:web:v1" : "product-workbench-preview-v1";
 const desktopStore=window.desktopWorkspace;
 let lastSaved;
 try { lastSaved=desktopStore ? desktopStore.load() : localStorage.getItem(key); }
@@ -36,7 +38,7 @@ function render(){
  }else{
    if(viewed===2 && (active || p.taskList?.round===p.round)){
      renderTaskList(p,panel);
-     if(!active || (p.taskList?.execution?.status==="complete" && p.taskList.round===p.round))renderArtifact(p,stage,active,panel);
+     if(!active || (hostedWeb && p.taskList?.round===p.round && p.taskList.confirmed) || (p.taskList?.execution?.status==="complete" && p.taskList.round===p.round))renderArtifact(p,stage,active,panel);
      else if(p.docs[2])panel.append(reference("已有开发记录",p.docs[2]));
    }else renderArtifact(p,stage,active,panel);
  }
@@ -104,7 +106,7 @@ async function generatePlan(p){
  const prd=p.docs[0], round=p.round;
  planRequests.add(p);delete p.planError;render();
  try{
-   const response=await fetch("/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prd})});
+   const response=await workbenchRequest("/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prd})});
    const data=await response.json();
    if(!response.ok || typeof data.plan!=="string" || !data.plan.trim())throw Error(data.error||"未收到完整方案，请重试。");
    if(p.step!==1 || p.round!==round || p.docs[0]!==prd)return;

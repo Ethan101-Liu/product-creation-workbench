@@ -70,7 +70,7 @@ function submitTurn(text,draft=false){
    const c=chat;const previous=c.messages.slice(-12);
    c.messages.push(text);waiting.add(c);openChat(c);
    const context=c.project===""?[]:state.projects[Number(c.project)]?.docs.slice(0,2)||[];
-   fetch("/api/discuss",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({context,history:previous,question:text,assistant:roles[role]})})
+   workbenchRequest("/api/discuss",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({context,history:previous,question:text,assistant:roles[role]})})
      .then(async res=>{const data=await res.json();if(!res.ok)throw Error(data.error||"模型请求失败");c.messages.push("助手　"+data.answer)})
      .catch(err=>c.messages.push("本轮未完成："+err.message))
      .finally(()=>{waiting.delete(c);save();if(chat===c)paintChat()});
@@ -94,7 +94,7 @@ async function requestTurn(c){
  if(waiting.has(c))return;
  waiting.add(c);const ir=c.intake;ir.error="";if(chat===c)paintChat();
  try{
-   const res=await fetch("/api/intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({turns:ir.turns,draft:ir.finish})});
+   const res=await workbenchRequest("/api/intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({turns:ir.turns,draft:ir.finish})});
    const data=await res.json();if(!res.ok)throw Error(data.error||"请求失败");
    if(data.draft){ir.draft=data.draft;ir.name=data.name}
    else if(data.question)ir.turns.push({role:"assistant",text:data.question});
@@ -324,7 +324,7 @@ $("agentForm").onsubmit = async event => {
  save();
  renderDiscussion(p, "send");
  try {
-   const res = await fetch("/api/discuss", {method:"POST", headers:{"Content-Type":"application/json"},
+   const res = await workbenchRequest("/api/discuss", {method:"POST", headers:{"Content-Type":"application/json"},
      body:JSON.stringify({context:p.docs.slice(0,2), tasks:p.taskList?.round===p.round?p.taskList:undefined, history, question})});
    const data = await res.json();
    if (!res.ok || typeof data.answer !== "string" || !data.answer.trim()) throw Error(data.error || "没有收到回复。");
@@ -341,10 +341,10 @@ $("agentForm").onsubmit = async event => {
 $("libraryToggle").onclick=()=>{$("catalogBody").hidden=!$("catalogBody").hidden};
 let connection={selected:"codex",model:"",base:""};
 let loginTimer=0;
-const connectionName=()=>connection.selected==="api"?connection.model:"Codex";
+const connectionName=()=>connection.selected==="api"?connection.model:(hostedWeb?"引导模式":"Codex");
 async function connectionRequest(action,values={}){
  if(localFile)throw Error("请从本机工作台服务打开页面。");
- const response=await fetch("/api/connection",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,...values})});
+ const response=await workbenchRequest("/api/connection",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,...values})});
  const result=await response.json();if(!response.ok)throw Error(result.error||"连接失败。");return result;
 }
 function updateConnection(value){
@@ -371,8 +371,8 @@ const modelCatalog=[
  {provider:"Google AI Studio",base:"https://generativelanguage.googleapis.com/v1beta/openai",models:[["gemini-3.8-flash","Gemini 3.8 Flash"]]}
 ];
 function renderModelSelect(select){
- const active=connection.selected==="api"?connection.connectionId:"codex";
- select.replaceChildren(new Option("Codex","codex"));
+ const active=connection.selected==="api"?connection.connectionId:(hostedWeb?"guide":"codex");
+ select.replaceChildren(hostedWeb ? new Option("引导模式","guide") : new Option("Codex","codex"));
  const profiles=connection.profiles||[];
  for(const [index,item] of profiles.entries()){
    const provider=modelCatalog.find(p=>p.base===item.base)?.provider||new URL(item.base).host;
@@ -391,7 +391,7 @@ async function selectModel(select){
  select.disabled=true;
  try{
    if(target==="codex"&&!(await connectionRequest("login-status")).signed){await openConfig("login");return}
-   const value=await connectionRequest("select",target==="codex"?{mode:"codex"}:{mode:"api",connectionId:target});
+   const value=await connectionRequest("select",target==="guide"?{mode:"guide"}:target==="codex"?{mode:"codex"}:{mode:"api",connectionId:target});
    updateConnection(value);
    if(config.open)connectionNote.textContent="已切换到 "+connectionName()+"。";
  }catch(err){if(config.open)showError(err);else $("notice").textContent=err.message}
@@ -447,7 +447,7 @@ async function openConfig(page){
      base.oninput=()=>{secret.value=""};
      syncPicker();
      const submit=el("button","测试并使用此模型");submit.className="primary";form.append(submit);
-     connectionBody.append(form);connectionNote.textContent="发送一次简短测试请求，成功后切换。密钥仅保存在本机服务内存中，重启服务后需重新填写。";
+     connectionBody.append(form);connectionNote.textContent=hostedWeb?"测试时会把 Key 直接发送给所选服务商。接口需支持浏览器跨域调用。刷新或关闭网页后需重新填写。":"发送一次简短测试请求，成功后切换。密钥仅保存在本机服务内存中，重启服务后需重新填写。";
      form.onsubmit=async e=>{
        e.preventDefault();const choice=picker.selectedOptions[0];
        const manual=choice.value==="custom";
@@ -488,8 +488,12 @@ async function chooseMode(mode){
 for(const button of document.querySelectorAll("[data-config]"))button.onclick=()=>openConfig(button.dataset.config);
 config.onclose=()=>{++dialogVersion;clearTimeout(loginTimer);connectionBody.replaceChildren()};
 $("closeConfig").onclick=()=>config.close();
+if(hostedWeb){
+ const desktopLink=el("a","桌面版");desktopLink.href="https://github.com/Ethan101-Liu/product-creation-workbench/releases/latest";desktopLink.style.color="inherit";document.querySelector("[data-config=login]").replaceWith(desktopLink);
+ $("guide").textContent="引导模式按问答生成可编辑模板。接入自己的 API Key 后，可使用 AI 追问、生成方案和自由对话。";
+}
 if(!localFile)connectionRequest("status").then(updateConnection).catch(()=>{});
 chat=state.chats[state.chatIndex]??null;
 if(state.screen==="documents")showDocs();
-else if(state.screen==="chat")openChat(state.chats[state.chatIndex]??null);
+else if(state.screen==="chat" || (hostedWeb && !state.screen))openChat(state.chats[state.chatIndex]??null);
 else openProject(state.active);
